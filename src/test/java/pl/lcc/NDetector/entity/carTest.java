@@ -29,4 +29,17 @@ class carTest {
             det.evaluate();
     }
 
+
+    @Test
+    void should_do_it2(){
+        var det = new Detector(sf, "start");
+        var c = new Car();
+        c.setName("fiat");
+        var c2 = new Car();
+        c2.setName("Merc");
+        cRepo.save(c);
+        cRepo.save(c2);
+        det.amount(Stat.FETCH).mustBe(Operator.EQUAL,0);
+        det.evaluate();
+    }
 }
