@@ -7,9 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.lcc.NDetector.detector.Detector;
 import pl.lcc.NDetector.detector.Operator;
 import pl.lcc.NDetector.detector.Stat;
+import pl.lcc.NDetector.detector.StatsSnapshot;
 import pl.lcc.NDetector.repo.CarRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class carTest {
 
@@ -25,7 +25,7 @@ class carTest {
             var c = new Car();
             c.setName("fiat");
             cRepo.save(c);
-            det.amount(Stat.FETCH).mustBe(Operator.EQUAL,0);
+            det.command(Stat.FETCH).mustBe(Operator.EQUAL,0).evaluate();
             det.evaluate();
     }
 
@@ -39,7 +39,8 @@ class carTest {
         c2.setName("Merc");
         cRepo.save(c);
         cRepo.save(c2);
-        det.amount(Stat.FETCH).mustBe(Operator.EQUAL,0);
+        det.command(Stat.FETCH).mustBe(Operator.EQUAL,0);
         det.evaluate();
     }
+
 }

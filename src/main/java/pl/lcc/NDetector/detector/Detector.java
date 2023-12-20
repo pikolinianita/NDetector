@@ -6,7 +6,7 @@ import org.hibernate.stat.Statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Detector {
+public class Detector implements NDetector{
 
     Statistics stats;
 
@@ -25,23 +25,50 @@ public class Detector {
         this(factory.getStatistics(), init);
     }
 
-    public String evaluate(){
+    public String evaluate() {
         return "huh";
     }
 
-    public HalfAssertion amount(Stat stat){
+    public HalfAssertion command(Stat stat) {
+
         return new HalfAssertion(stat);
     }
 
-   public class HalfAssertion{
+    public class HalfAssertion {
 
-            public HalfAssertion(Stat stat) {
+        public HalfAssertion(Stat stat) {
 
-    }
-        public Detector mustBe(Operator op, int n){
+        }
 
+        public Detector mustBe(Operator op, int n) {
             return Detector.this;
         }
+
+        //TODO
+        public HalfAssertion from(String snap){
+            throw new RuntimeException("half from");
+        }
+
+        //TODO
+        public HalfAssertion between(String snap, String snap2){
+            throw new RuntimeException("half between");
+        }
+    }
+
+    public record Assertion(StatsSnapshot initTime, StatsSnapshot otherTime, Stat command, Operator op, int value){
+        public String evaluate(){
+            long difference = command.extract(otherTime) - command.extract(initTime);
+            boolean result = op.evaluate(difference, value);
+            if (result){
+                return "";
+            } else{
+                return "Assertion Error: " + command + " " + op
+                        + " expected: " + String.valueOf(value)
+                        + " actual: " + String.valueOf(difference);
+            }
+
+        }
+
     }
 
 }
