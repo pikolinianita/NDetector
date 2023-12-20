@@ -8,9 +8,9 @@ import java.util.Map;
 
 public class Detector implements NDetector{
 
-    Statistics stats;
+    final Statistics stats;
 
-    Map<String, StatsSnapshot> timePoints;
+    final Map<String, StatsSnapshot> timePoints;
 
     public Detector(Statistics stats, String init) {
         this.stats = stats;
@@ -36,11 +36,19 @@ public class Detector implements NDetector{
 
     public class HalfAssertion {
 
-        public HalfAssertion(Stat stat) {
+        StatsSnapshot initTime;
+        StatsSnapshot otherTime;
+        final Stat command;
+        Operator op;
+        int value;
 
+        public HalfAssertion(Stat stat) {
+            this.command = stat;
         }
 
-        public Detector mustBe(Operator op, int n) {
+        public Detector shouldBe(Operator op, int n) {
+            this.op = op;
+            this.value = n;
             return Detector.this;
         }
 
@@ -63,8 +71,8 @@ public class Detector implements NDetector{
                 return "";
             } else{
                 return "Assertion Error: " + command + " " + op
-                        + " expected: " + String.valueOf(value)
-                        + " actual: " + String.valueOf(difference);
+                        + " expected: " + value
+                        + " actual: " + difference;
             }
 
         }

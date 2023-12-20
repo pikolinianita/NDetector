@@ -2,7 +2,7 @@ package pl.lcc.NDetector.detector;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AssertionTest {
     @Test
@@ -12,5 +12,6 @@ class AssertionTest {
         var assertion = new Detector.Assertion(stats1, stats2, Stat.FETCH, Operator.EQUAL, 1);
         String result = assertion.evaluate();
         System.out.println(result);
+        assertThat(result).isEqualTo("");
     }
 }

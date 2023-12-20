@@ -6,7 +6,7 @@ import java.util.function.BinaryOperator;
 public enum Operator {
     EQUAL(Long::equals);
 
-    private BiPredicate<Long,Long> operation;
+    private final BiPredicate<Long,Long> operation;
     Operator(BiPredicate<Long,Long> operation){
         this.operation = operation;
     }
