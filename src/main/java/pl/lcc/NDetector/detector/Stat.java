@@ -2,6 +2,7 @@ package pl.lcc.NDetector.detector;
 
 import java.util.function.Function;
 
+//This enum is used to represent the different statistics that can be measured.
 public enum Stat {
     FETCH(StatsSnapshot::loaded);
 

@@ -3,14 +3,21 @@ package pl.lcc.NDetector.detector;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Detector implements NDetector{
 
-    final Statistics stats;
+    //Hibernate object
+    final private Statistics stats;
 
-    final Map<String, StatsSnapshot> timePoints;
+    final private Map<String, StatsSnapshot> timePoints;
+
+    final private String initName;
+
+    final private List<Assertion> assertions = new ArrayList<>();
 
     public Detector(Statistics stats, String init) {
         this.stats = stats;
@@ -19,6 +26,7 @@ public class Detector implements NDetector{
         }
         timePoints = new HashMap<>();
         timePoints.put(init, new StatsSnapshot(stats));
+        initName = init;
     }
 
     public Detector(SessionFactory factory, String init) {
@@ -26,44 +34,62 @@ public class Detector implements NDetector{
     }
 
     public String evaluate() {
-        return "huh";
+        var result = "";
+        for (Assertion assertion : assertions) {
+            result += assertion.evaluate();
+        }
+        return result;
     }
 
-    public HalfAssertion command(Stat stat) {
+    public AssertionBuilder command(Stat stat) {
 
-        return new HalfAssertion(stat);
+        return new AssertionBuilder(stat);
     }
 
-    public class HalfAssertion {
+    public class AssertionBuilder {
 
         StatsSnapshot initTime;
         StatsSnapshot otherTime;
-        final Stat command;
+        final Stat SqlCommand;
         Operator op;
         int value;
 
-        public HalfAssertion(Stat stat) {
-            this.command = stat;
+        public AssertionBuilder(Stat stat) {
+            this.SqlCommand = stat;
         }
 
         public Detector shouldBe(Operator op, int n) {
             this.op = op;
             this.value = n;
+            if (initTime == null) {
+                initTime = timePoints.get(initName);
+            }
+            if (otherTime == null) {
+                otherTime = new StatsSnapshot(stats);
+            }
+            assertions.add(new Assertion(this));
             return Detector.this;
         }
 
-        //TODO
-        public HalfAssertion from(String snap){
-            throw new RuntimeException("half from");
+        public AssertionBuilder from(String snapName){
+            initTime = timePoints.get(snapName);
+            return this;
         }
 
-        //TODO
-        public HalfAssertion between(String snap, String snap2){
-            throw new RuntimeException("half between");
+        public AssertionBuilder between(String snapStart, String snapEnd){
+            initTime = timePoints.get(snapStart);
+            otherTime = timePoints.get(snapEnd);
+            return this;
         }
     }
 
+    //This class is used to represent and check an assertion.
     public record Assertion(StatsSnapshot initTime, StatsSnapshot otherTime, Stat command, Operator op, int value){
+
+        Assertion(AssertionBuilder builder) {
+            this(builder.initTime, builder.otherTime, builder.SqlCommand, builder.op, builder.value);
+        }
+
         public String evaluate(){
             long difference = command.extract(otherTime) - command.extract(initTime);
             boolean result = op.evaluate(difference, value);
@@ -72,7 +98,7 @@ public class Detector implements NDetector{
             } else{
                 return "Assertion Error: " + command + " " + op
                         + " expected: " + value
-                        + " actual: " + difference;
+                        + " actual: " + difference + System.lineSeparator();
             }
 
         }

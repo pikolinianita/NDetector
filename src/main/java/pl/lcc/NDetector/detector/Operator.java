@@ -1,8 +1,9 @@
 package pl.lcc.NDetector.detector;
 
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 
+//This enum is used to represent the different operators that can be used in assertions.
+// function evaluate() is used to evaluate the assertion.
 public enum Operator {
     EQUAL(Long::equals);
 
